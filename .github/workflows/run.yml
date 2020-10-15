@@ -1,0 +1,12 @@
+name: View Website
+on:
+  push:
+jobs:
+  view-website:
+    runs-on: ubuntu-latest
+    steps:
+      -   uses: actions/checkout@v2
+      -   name: Install NPM Dependencies
+          run: npm install --cache /tmp/empty-cache
+      -   name: View Website
+          run: node ./run.js
