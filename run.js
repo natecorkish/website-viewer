@@ -6,7 +6,7 @@ puppeteer.use(StealthPlugin())
 puppeteer.use(AnonymiseUA())
 
 // puppeteer usage as normal
-puppeteer.launch({ headless: false }).then(async browser => {
+puppeteer.launch({ headless: true }).then(async browser => {
     let website = 'http://finescoop.com'
     const page = await browser.newPage()
 
