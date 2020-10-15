@@ -1,0 +1,22 @@
+{
+  "name": "viewer",
+  "version": "1.0.0",
+  "description": "Viewer -- That's all!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "viewer"
+  ],
+  "author": "Nate Corkish",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^5.3.1",
+    "puppeteer-autoscroll-down": "^0.1.6",
+    "puppeteer-extra": "^3.1.15",
+    "puppeteer-extra-plugin-adblocker": "^2.11.6",
+    "puppeteer-extra-plugin-anonymize-ua": "^2.2.14",
+    "puppeteer-extra-plugin-stealth": "^2.6.2"
+  }
+}
