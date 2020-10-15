@@ -1,12 +1,21 @@
 const puppeteer = require('puppeteer-extra')
 const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+const AnonymiseUA = require('puppeteer-extra-plugin-anonymize-ua')
 
 puppeteer.use(StealthPlugin())
+puppeteer.use(AnonymiseUA())
 
-// puppeteer usage as normal
-puppeteer.launch({ headless: true }).then(async browser => {
-    while(true) {
-        let website = 'http://finescoop.com'
+
+/**
+ * Run the bot
+ */
+run = async() => {
+    const browser = await puppeteer.launch({
+        args: ['--disable-features=site-per-process'],
+        headless: true
+    })
+    while (true) {
+        const website = 'https://finescoop.com'
         const page = await browser.newPage()
 
         // Visit 20 pages per run
@@ -16,28 +25,28 @@ puppeteer.launch({ headless: true }).then(async browser => {
             // Visit an index page
             console.log(`Visiting ${url}`)
             await page.goto(url)
-            await page.waitForTimeout(5000)
-
-            // Click an advert on the index page
-            await click_as_user(page)
+            await page.waitForTimeout(1000)
 
             // Scroll to bottom of index page
             await autoScroll(page, '.article-post')
+
+            // Click an advert on the index page
+            await click_as_user(page)
 
             // Read all article links
             await read_articles(page)
         }
         await browser.close()
     }
-})
+}
 
 /**
- * Browse the website like a normal user
- * visit webpages, slowly scroll and do
- * legit user things
+ * Read articles and visit ads
+ * @param page
+ * @returns {Promise<void>}
  */
 read_articles = async (page) => {
-    const articles =  await page.$$eval('.article-post', anchors => [].map.call(anchors, a => a.href));
+    const articles = await page.$$eval('.article-post', anchors => [].map.call(anchors, a => a.href));
     for (const article of articles) {
         console.log(`Visiting ${article}`)
         await page.goto(article)
@@ -63,9 +72,9 @@ const autoScroll = async (page, selector) => {
 }
 
 /**
- * Click an advertisement like a normal user
- * When scrolling down and find an ad element
- * View it and then 'decide' to click it
+ * Click an advertisement ever 100 times
+ * @param page
+ * @returns {Promise<void>}
  */
 click_as_user = async (page) => {
     // Click ads 1% of the time
@@ -73,12 +82,21 @@ click_as_user = async (page) => {
         return
     }
 
-    // Scroll and click and advertisement
-    await new Promise(async (resolve) => {
-        await page.$('a.google-auto-placed', ad => ad.scrollIntoView({ behavior: 'smooth' }))
-        await page.click('a.google-auto-placed')
-        await page.waitForNavigation()
-        await page.back()
-        resolve(1)
-    })
+    await page.waitForSelector('.google-auto-placed iframe', { visible: true })
+    const advert = await page.$('.google-auto-placed iframe')
+    const frame = await advert.contentFrame()
+
+    // Scroll in to advert position
+    advert.evaluate(advert => advert.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+        inline: 'center'
+    }))
+
+    // Wait for the advert to load
+    await frame.click('.title-link')
+    await page.waitForNavigation()
+    await page.screenshot({path: 'screenshot.png'});
 }
+
+run()
